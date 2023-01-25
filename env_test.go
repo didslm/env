@@ -11,7 +11,7 @@ type MyStruct struct {
 }
 
 type MainStruct struct {
-	MyStruct `obj:"MyStruct"`
+	MyStruct `obj:"ref"`
 }
 
 func TestPopulateFromEnv(t *testing.T) {
@@ -20,7 +20,11 @@ func TestPopulateFromEnv(t *testing.T) {
 	os.Setenv("FIELD_2", "5")
 
 	s := MyStruct{}
-	PopulateWithEnv(&s)
+	err := PopulateWithEnv(&s)
+
+	if err != nil {
+		t.Error("Unexpected error, ", err)
+	}
 
 	// Assert that the fields of the struct were correctly populated
 	if s.Field1 != "test value 1" {
@@ -40,7 +44,12 @@ func TestPopulateStructWithinStructs(t *testing.T) {
 	os.Setenv("FIELD_2", "5")
 
 	s := MainStruct{}
-	PopulateWithEnv(&s)
+	err := PopulateWithEnv(&s)
+
+	if err != nil {
+		t.Error("Unexpected error, ", err.Error())
+	}
+
 	if s.Field1 != "test value 1" {
 		t.Error("Expected Field1 to be 'test value 1', got ", s.Field1)
 	}
@@ -51,4 +60,15 @@ func TestPopulateStructWithinStructs(t *testing.T) {
 
 	os.Unsetenv("FIELD_1")
 	os.Unsetenv("FIELD_2")
+}
+
+func TestErrorHandling(t *testing.T) {
+	os.Setenv("FIELD_1", "1234")
+	s := MainStruct{}
+	err := PopulateWithEnv(&s)
+
+	if err == nil {
+		t.Error("Expected error, ", err)
+	}
+	os.Unsetenv("FIELD_1")
 }
