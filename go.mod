@@ -1,3 +1,3 @@
-module github.com/Diarselimi/env
+module github.com/didslm/env
 
 go 1.19
